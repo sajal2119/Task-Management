@@ -1,0 +1,1 @@
+mkdir -p tmp tmp/public tmp/views tmp/public/assets/images

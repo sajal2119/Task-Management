@@ -1,0 +1,23 @@
+@charset "UTF-8";
+
+@import "./materialize/components/mixins";
+@import "./_customVariables";
+@import "./materialize/components/color";
+@import "./materialize/components/variables";
+@import "./materialize/components/normalize";
+@import "./materialize/components/global";
+@import "./materialize/components/grid";
+@import "./materialize/components/cards";
+@import "./materialize/components/typography";
+
+body {
+  font-family: "Clear Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.col{
+  min-height:1px;
+}
+
+a {
+  color: #444;
+}
