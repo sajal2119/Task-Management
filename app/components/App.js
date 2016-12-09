@@ -5,12 +5,7 @@ import injectTapEventPlugin from 'react-tap-event-plugin';
 
 injectTapEventPlugin();
 
-const muiTheme = getMuiTheme({
-  appBar: {
-    backgroundColor: '#8bc34a',
-    width: '100%'
-  }
-});
+const muiTheme = getMuiTheme({});
 
 const App = (props) => (
   <MuiThemeProvider muiTheme={muiTheme}>

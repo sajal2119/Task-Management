@@ -162,6 +162,7 @@ class ProjectListing extends Component {
     return (
       <div>
         <AppBar
+          style={{ backgroundColor: '#00bfa5' }}
           title={<span>Task Management</span>}
           iconElementLeft={<span />}
         />

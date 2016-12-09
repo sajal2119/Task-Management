@@ -20,7 +20,10 @@ class ProjectDetails extends Component {
       status: null,
       statusErrorText: '',
       isNewTaskFormValid: false,
-      selectedMemberKey: null
+      selectedMemberKey: null,
+      isShowAddMemberCard: false,
+      newMemberKey: null,
+      isAddMemberFormValid: false
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -28,6 +31,7 @@ class ProjectDetails extends Component {
     this.handleStatusChange = this.handleStatusChange.bind(this);
     this.handleShowCreateTaskDialog = this.handleShowCreateTaskDialog.bind(this);
     this.handleCreateTaskFormSubmit = this.handleCreateTaskFormSubmit.bind(this);
+    this.addNewMemberFomrSubmit = this.addNewMemberFomrSubmit.bind(this);
     this.handleHideCreateTaskDialog = this.handleHideCreateTaskDialog.bind(this);
   }
 
@@ -106,6 +110,16 @@ class ProjectDetails extends Component {
     this.handleHideCreateTaskDialog();
   }
 
+  addNewMemberFomrSubmit() {
+    const { newMemberKey } = this.state;
+    this.props.onAddNewMemberToProject(newMemberKey, this.props.params.projectKey);
+    this.setState({
+      isShowAddMemberCard: false,
+      newMemberKey: null,
+      isAddMemberFormValid: false
+    });
+  }
+
   render() {
     const styles = {
       row: {
@@ -148,9 +162,7 @@ class ProjectDetails extends Component {
         fontSize: '14px',
         padding: '24px',
         cursor: 'pointer',
-        textAlign: 'center',
-        display: 'flex',
-        alignItems: 'center'
+        textAlign: 'center'
       },
     };
     const {
@@ -158,7 +170,8 @@ class ProjectDetails extends Component {
       taskStatuses,
       projects,
       isShowCreateTaskDialog,
-      onClose
+      onClose,
+      employees
     } = this.props;
     const {
       title,
@@ -167,14 +180,20 @@ class ProjectDetails extends Component {
       titleErrorText,
       descriptionErrorText,
       statusErrorText,
-      isNewTaskFormValid
+      isNewTaskFormValid,
+      isShowAddMemberCard,
+      newMemberKey,
+      isAddMemberFormValid
     } = this.state;
 
     const selectedProject = projects.filter(
       (projectItem) => projectItem.key === params.projectKey
     )[0];
 
-    const actions = [
+    const membersInProject = selectedProject.members.map((member) => member.nameId);
+    const membersNotInPorject = employees.filter((employee) => (membersInProject.indexOf(employee.id) === -1));
+
+    const createTaskActions = [
       <FlatButton
         label="Cancel"
         primary
@@ -194,13 +213,14 @@ class ProjectDetails extends Component {
     return (
       <div>
         <AppBar
+          style={{ backgroundColor: '#00bfa5' }}
           title={<span>{selectedProject.title}</span>}
           iconElementLeft={<span />}
           iconElementRight={<IconButton onClick={onClose}><NavigationClose /></IconButton>}
         />
         <Dialog
           title="Create new task"
-          actions={actions}
+          actions={createTaskActions}
           modal={false}
           autoScrollBodyContent
           open={isShowCreateTaskDialog}
@@ -254,11 +274,11 @@ class ProjectDetails extends Component {
               {...member}
             />)
           }
-          <div className="col s12 m4 l3" style={styles.newMemberContainer}>
+          {membersNotInPorject.length > 0  && <div className="col s12 m4 l3" style={styles.newMemberContainer}>
             <div
               className="card"
               style={styles.newMemberActionContainer}
-              onClick={this.onShowAddMemberCard}
+              onClick={() => {this.setState({ isShowAddMemberCard: true });}}
             >
               <div style={styles.action}>
                 Add New Member
@@ -266,26 +286,48 @@ class ProjectDetails extends Component {
             </div>
             {isShowAddMemberCard && <div
               className="card"
-              style={styles.newMemberCardContainer}
+              style={styles.newMemberActionContainer}
             >
-              <SelectField
-                value={newMember}
-                fullWidth
-                floatingLabelText="Member"
-                onChange={this.handleStatusChange}
-                labelStyle={styles.selectLabel}
-                errorText={memberErrorText}
-              >
-                {employees.map((employee) =>
-                  <MenuItem
-                    key={employee.id}
-                    value={employee.id}
-                    primaryText={employee.name}
-                  />)
-                }
-              </SelectField>
+              <div>
+                <SelectField
+                  value={newMemberKey}
+                  fullWidth
+                  onChange={(event, key, value) => {this.setState({ isAddMemberFormValid: true, newMemberKey: value });}}
+                  floatingLabelText="Select New Member"
+                  labelStyle={styles.selectLabel}
+                >
+                  {membersNotInPorject.map((employee) =>
+                    <MenuItem
+                      key={employee.id}
+                      value={employee.id}
+                      primaryText={employee.name}
+                    />)
+                  }
+                </SelectField>
+              </div>
+              <div>
+                <FlatButton
+                  label="Cancel"
+                  primary
+                  style={styles.actionButton}
+                  onTouchTap={() => {
+                    this.setState({
+                      isShowAddMemberCard: false,
+                      newMemberKey: null,
+                      isAddMemberFormValid: false
+                    });}}
+                />
+                <FlatButton
+                  label="Add"
+                  primary
+                  disabled={!isAddMemberFormValid}
+                  style={styles.actionButton}
+                  keyboardFocused
+                  onTouchTap={this.addNewMemberFomrSubmit}
+                />
+                </div>
             </div>}
-          </div>
+          </div>}
         </div>
       </div>
     );
@@ -295,9 +337,11 @@ class ProjectDetails extends Component {
 ProjectDetails.propTypes = {
   params: PropTypes.object,
   taskStatuses: PropTypes.array,
+  employees: PropTypes.array,
   projects: PropTypes.array,
   onClose: PropTypes.func,
   onCreateTask: PropTypes.func,
+  onAddNewMemberToProject: PropTypes.func,
   isShowCreateTaskDialog: PropTypes.bool,
   onShowCreateTaskDialog: PropTypes.func,
   onHideCreateTaskDialog: PropTypes.func

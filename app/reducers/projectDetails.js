@@ -1,5 +1,7 @@
 import objectAssign from 'object-assign';
 
+let draggedTaskData = null;
+
 const initialState = {
   isShowCreateProjectDialog: false,
   isShowCreateTaskDialog: false,
@@ -213,7 +215,8 @@ const initialState = {
   ]
 };
 
-const createMembersForNewProjectByIds = (membersArray) => {
+// Add member to the newly created project
+const createMembersForNewProjectById = (membersArray) => {
   const formattedMembersArray = [];
   membersArray.map((memberItem) => {
     formattedMembersArray.push({
@@ -225,6 +228,7 @@ const createMembersForNewProjectByIds = (membersArray) => {
   return formattedMembersArray;
 };
 
+// Update task on status change
 const updateTaskOnUpdation = (task = [], action) => {
   if (task.id !== action.taskId) {
     return task;
@@ -234,6 +238,7 @@ const updateTaskOnUpdation = (task = [], action) => {
   });
 };
 
+// Update project member object on new task creation
 const updateProjectMemberOnTaskCreation = (member = [], action) => {
   if (member.nameId !== action.nameId) {
     return member;
@@ -248,6 +253,26 @@ const updateProjectMemberOnTaskCreation = (member = [], action) => {
   });
 };
 
+// Update project member object on task switch
+const updateProjectMemberOnTaskSwtich = (member = [], action) => {
+  if (member.nameId !== action.draggedMemberId && member.nameId !== action.droppedMemberId) {
+    return member;
+  }
+  // Remove task from the dragged member and store task details in static variable
+  if (member.nameId === action.draggedMemberId) {
+    draggedTaskData = member.tasks.filter((task) => (task.id === action.draggedTaskId))[0];
+    return objectAssign({}, member, {
+      tasks: member.tasks.filter((task) => (task.id !== action.draggedTaskId))
+    });
+  }
+  // Add task to the dropped member
+  return objectAssign({}, member, {
+    tasks: member.tasks.concat(draggedTaskData)
+  });
+};
+
+
+// Update project member object on task status change
 const updateProjectMemberOnTaskUpdation = (member = [], action) => {
   if (member.nameId !== action.nameId) {
     return member;
@@ -259,6 +284,7 @@ const updateProjectMemberOnTaskUpdation = (member = [], action) => {
   });
 };
 
+// Update project object on task creation for a member
 const updateProjectOnTaskCreation = (project = {}, action) => {
   if (project.key !== action.projectKey) {
     return project;
@@ -270,6 +296,33 @@ const updateProjectOnTaskCreation = (project = {}, action) => {
   });
 };
 
+// Update project object on task switch between members
+const updateProjectOnTaskSwitch = (project = {}, action) => {
+  draggedTaskData = null;
+  if (project.key !== action.projectKey) {
+    return project;
+  }
+  return objectAssign({}, project, {
+    members: project.members.map(member =>
+      updateProjectMemberOnTaskSwtich(member, action)
+    )
+  });
+};
+
+// Update project object on new member addition
+const updateProjectOnMemberAddition = (project = {}, action) => {
+  if (project.key !== action.projectKey) {
+    return project;
+  }
+  return objectAssign({}, project, {
+    members: project.members.concat({
+      nameId: action.nameId,
+      tasks: []
+    })
+  });
+};
+
+// Update project object for a member's task status change
 const updateProjectOnTaskUpdation = (project = {}, action) => {
   if (project.key !== action.projectKey) {
     return project;
@@ -295,13 +348,25 @@ const projectDetails = (state = initialState, action) => {
           title: action.title,
           key: action.title.split(' ').join('_').toLowerCase(),
           description: action.description,
-          members: createMembersForNewProjectByIds(action.membersArray)
+          members: createMembersForNewProjectById(action.membersArray)
         })
+      });
+    case 'ADD_NEW_MEMBER_TO_PROJECT':
+      return objectAssign({}, state, {
+        projects: state.projects.map(project =>
+          updateProjectOnMemberAddition(project, action)
+        )
       });
     case 'CHANGE_TASK_STATUS':
       return objectAssign({}, state, {
         projects: state.projects.map(project =>
           updateProjectOnTaskUpdation(project, action)
+        )
+      });
+    case 'TASK_SWITCH':
+      return objectAssign({}, state, {
+        projects: state.projects.map(project =>
+          updateProjectOnTaskSwitch(project, action)
         )
       });
     case 'SHOW_CREATE_PROJECT_DIALOG':

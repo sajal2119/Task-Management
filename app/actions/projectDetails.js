@@ -14,6 +14,20 @@ const createTask = (taskData) => ({
   nameId: taskData.nameId
 });
 
+const switchTask = (draggedMemberId, droppedMemberId, draggedTaskId, projectKey) => ({
+  type: 'TASK_SWITCH',
+  draggedMemberId,
+  droppedMemberId,
+  draggedTaskId,
+  projectKey
+});
+
+const addNewMemberToProject = (nameId, projectKey) => ({
+  type: 'ADD_NEW_MEMBER_TO_PROJECT',
+  projectKey,
+  nameId
+});
+
 const showCreateProjectDialog = () => ({
   type: 'SHOW_CREATE_PROJECT_DIALOG'
 });
@@ -41,7 +55,9 @@ const changeTaskStatus = (projectKey, nameId, taskId, newStatus) => ({
 export default {
   createProject,
   createTask,
+  switchTask,
   changeTaskStatus,
+  addNewMemberToProject,
   showCreateProjectDialog,
   showCreateTaskDialog,
   hideCreateProjectDialog,

@@ -1,6 +1,6 @@
 {
-  "name": "Sprinklr-Assignment",
-  "description": "Sprinklr-Assignment",
+  "name": "Task-Management",
+  "description": "A very simple user interface in order to manage tasks within a team",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

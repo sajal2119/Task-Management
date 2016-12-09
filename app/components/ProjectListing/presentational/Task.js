@@ -1,6 +1,15 @@
 import React, { PropTypes } from 'react';
+import objectAssign from 'object-assign';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
+
+const colorMap = {
+  done: '#66bb6a',
+  on_hold: '#ff7043',
+  schedule: '#ffee58',
+  in_process: '#b2dfdb',
+  sent: '#42a5f5'
+};
 
 const styles = {
   container: {
@@ -40,7 +49,7 @@ const Task = ({
   taskStatuses,
   onChangeTaskStatus
 }) => (
-  <div style={styles.container}>
+  <div style={objectAssign({}, styles.container, { borderLeft: `5px solid ${colorMap[statuskey]}` })}>
     <div style={styles.title}>
       {title}
     </div>

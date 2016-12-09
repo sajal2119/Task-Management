@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import { Task } from '../container';
+import { Draggable, Droppable } from 'react-drag-and-drop'
 
 const styles = {
   container: {
@@ -22,7 +23,8 @@ const styles = {
     minHeight: '80px',
     textAlign: 'center',
     display: 'flex',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginBottom: '60px'
   },
   action: {
     flexGrow: '100',
@@ -35,31 +37,45 @@ const Member = ({
   tasks,
   projectKey,
   employees,
-  onShowCreateTaskDialog
+  onShowCreateTaskDialog,
+  onTaskSwitch
 }) => {
-  const selectedEmployee = employees.filter((employee => employee.id === nameId))[0];
+  const selectedEmployee = employees.filter(employee => employee.id === nameId)[0];
+  const handleTaskSwitch = (switchedTaskData) => {
+    const switchedTaskDataArray = switchedTaskData.task.split('-');
+    if (switchedTaskDataArray[1] !== nameId) {
+      onTaskSwitch(switchedTaskDataArray[1], nameId, switchedTaskDataArray[0], projectKey);
+    }
+  };
+
   return (
     <div className="col s12 m4 l3" style={styles.container}>
-      <div className="z-depth-2" style={styles.name}>
-        {selectedEmployee.name}
-      </div>
-      {tasks.map((task) =>
-        <Task
-          projectKey={projectKey}
-          nameId={nameId}
-          key={task.id}
-          {...task}
-        />)
-      }
-      <div
-        className="card"
-        style={styles.actionContainer}
-        onClick={() => {onShowCreateTaskDialog(nameId);}}
+      <Droppable
+        types={['task']} // <= allowed drop types
+        onDrop={(data) => {handleTaskSwitch(data);}}
       >
-        <div style={styles.action}>
-          Create New Task
+        <div className="z-depth-2" style={styles.name}>
+          {selectedEmployee.name}
         </div>
-      </div>
+        {tasks.map((task) =>
+          <Draggable type="task" data={`${task.id}-${nameId}`} key={task.id}>
+            <Task
+              projectKey={projectKey}
+              nameId={nameId}
+              {...task}
+            />
+          </Draggable>)
+        }
+        <div
+          className="card"
+          style={styles.actionContainer}
+          onClick={() => {onShowCreateTaskDialog(nameId);}}
+        >
+          <div style={styles.action}>
+            Create New Task
+          </div>
+        </div>
+      </Droppable>
     </div>
   );
 };
@@ -69,6 +85,7 @@ Member.propTypes = {
   tasks: PropTypes.array,
   employees: PropTypes.array,
   projectKey: PropTypes.string,
+  onTaskSwitch: PropTypes.func,
   onShowCreateTaskDialog: PropTypes.func
 };
 
