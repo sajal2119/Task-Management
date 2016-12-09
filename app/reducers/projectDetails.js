@@ -260,7 +260,6 @@ const updateProjectMemberOnTaskSwtich = (member = [], action) => {
   }
   // Remove task from the dragged member and store task details in static variable
   if (member.nameId === action.draggedMemberId) {
-    draggedTaskData = member.tasks.filter((task) => (task.id === action.draggedTaskId))[0];
     return objectAssign({}, member, {
       tasks: member.tasks.filter((task) => (task.id !== action.draggedTaskId))
     });
@@ -302,6 +301,11 @@ const updateProjectOnTaskSwitch = (project = {}, action) => {
   if (project.key !== action.projectKey) {
     return project;
   }
+  project.members.map(member => {
+    if (member.nameId === action.draggedMemberId) {
+      draggedTaskData = member.tasks.filter((task) => (task.id === action.draggedTaskId))[0];
+    }
+  });
   return objectAssign({}, project, {
     members: project.members.map(member =>
       updateProjectMemberOnTaskSwtich(member, action)

@@ -1,5 +1,6 @@
-var path = require('path'),
-  webpack = require('webpack')
+var path = require('path');
+var webpack = require('webpack');
+
 module.exports = {
     entry: "./app/Entry.js",
     output: {
@@ -15,14 +16,7 @@ module.exports = {
                 presets: ['react', 'es2015']
             }
         }]
-    }/*,
-    plugins: [
-        new webpack.DefinePlugin({
-            'process.env': {
-                'NODE_ENV': JSON.stringify('production')
-            }
-        })
-    ]*/,
+    },
     resolve: {
         alias: {
             react: path.resolve(__dirname, './node_modules/react')
